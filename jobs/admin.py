@@ -30,6 +30,7 @@ class EventInline(admin.TabularInline):
 	extra = 1
 
 class JobAdmin(admin.ModelAdmin):
+	list_display = ('__unicode__', 'latest_consultation_date', 'latest_event')
 	inlines = [EventInline]
 
 

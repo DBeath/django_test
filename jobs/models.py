@@ -1,6 +1,8 @@
 from django.db import models
 import datetime
 from django.utils import timezone
+from django.db.models import Max
+import operator
 
 JOB_STATUS_CHOICES = (
 		('cl', 'Consultation'),
@@ -63,6 +65,7 @@ class Phone(models.Model):
 			self.area_code, self.number)
 		return phone_string
 
+
 class Job(models.Model):
 	client = models.ForeignKey(Client)
 	address = models.ForeignKey(Address)
@@ -73,15 +76,26 @@ class Job(models.Model):
 		job_string = u"%s | %s" % (self.client, self.address)
 		return job_string
 
+	def latest_consultation_date(self):
+		return self.jobevent_set.filter(job_status__contains='cl').latest('date').date
+
+	def latest_event(self):
+		return self.jobevent_set.latest('date')
+		
+
 class JobEvent(models.Model):
 	job_status = models.CharField(max_length=2, choices=JOB_STATUS_CHOICES)
 	date = models.DateField()
 	job = models.ForeignKey(Job)
-	comment = models.TextField()
+	comment = models.TextField(blank=True, null=True)
 
 	def __unicode__(self):
-		return self.get_job_status_display()
+		jobevent_string = u"%s on %s" % (self.get_job_status_display(), self.date)
+		return jobevent_string
 
 		
+# def getLCD(job):
+# 	return job.latest_consultation_date()
 
+# jobs.sort(key=getLCD)
 
